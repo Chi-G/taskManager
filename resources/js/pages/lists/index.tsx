@@ -1,6 +1,6 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, CheckCircle2, XCircle } from 'lucide-react';
+import { Plus, Pencil, Trash2, CheckCircle2, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -18,7 +18,15 @@ interface List {
 }
 
 interface Props {
-    lists: List[];
+    lists: {
+        data: List[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+        from: number;
+        to: number;
+    };
     flash?: {
         success?: string;
         error?: string;
@@ -103,6 +111,15 @@ export default function ListsIndex({ lists, flash }: Props) {
         destroy(route('lists.destroy', listId));
     };
 
+    const handlePageChange = (page: number) => {
+        router.get(route('lists.index'), {
+            page,
+        }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Lists" />
@@ -170,7 +187,7 @@ export default function ListsIndex({ lists, flash }: Props) {
 
                 {/* Lists Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {lists.map((list) => (
+                    {lists.data.map((list) => (
                         <Card key={list.id} className="hover:bg-accent/50 transition-colors">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-lg font-medium">
@@ -207,6 +224,31 @@ export default function ListsIndex({ lists, flash }: Props) {
                         </Card>
                     ))}
                 </div>
+
+                {/* Pagination */}
+                {lists.last_page > 1 && (
+                    <div className="flex justify-center items-center gap-2 mt-4">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handlePageChange(lists.current_page - 1)}
+                            disabled={lists.current_page === 1}
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <span className="text-sm text-muted-foreground">
+                            Page {lists.current_page} of {lists.last_page}
+                        </span>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handlePageChange(lists.current_page + 1)}
+                            disabled={lists.current_page === lists.last_page}
+                        >
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )}
             </div>
         </AppLayout>
     );

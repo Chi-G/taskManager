@@ -15,7 +15,7 @@ class ListController extends Controller
     {
         $lists = TaskList::where('user_id', auth()->id())
             ->with('tasks')
-            ->get();
+            ->paginate(9); 
 
         return Inertia::render('lists/index', [
             'lists' => $lists,

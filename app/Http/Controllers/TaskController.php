@@ -34,7 +34,7 @@ class TaskController extends Controller
             $query->where('is_completed', request('filter') === 'completed');
         }
 
-        $tasks = $query->paginate(10);
+        $tasks = $query->paginate(9);
 
         $lists = TaskList::where('user_id', auth()->id())->get();
 
