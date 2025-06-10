@@ -25,7 +25,7 @@ interface Props {
     };
 }
 
-const breadcrumbs: BreadcrumbItem[] = [ 
+const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Lists',
         href: '/lists',
@@ -125,7 +125,10 @@ export default function ListsIndex({ lists, flash }: Props) {
 
                 {/* Header Section */}
                 <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-bold">Lists</h1>
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight">Lists</h1>
+                        <p className="text-muted-foreground mt-1">Create and Manage your Lists and stay organized</p>
+                    </div>
                     <Dialog open={isOpen} onOpenChange={setIsOpen}>
                         <DialogTrigger>
                             <Button>

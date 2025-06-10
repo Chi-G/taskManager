@@ -38,7 +38,7 @@ class TaskController extends Controller
 
         $lists = TaskList::where('user_id', auth()->id())->get();
 
-        return Inertia::render('Tasks/Index', [
+        return Inertia::render('tasks/index', [
             'tasks' => $tasks,
             'lists' => $lists,
             'filters' => [

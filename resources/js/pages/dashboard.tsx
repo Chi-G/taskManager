@@ -42,13 +42,13 @@ export default function Dashboard({
                     </div>
                     <div className="flex gap-2">
                         <Link href={route('lists.index')}>
-                            <Button className="bg-primary hover:bg-primary/90 text-white shadow-lg">
+                            <Button>
                                 <List className="h-4 w-4 mr-2" />
                                 View Lists
                             </Button>
                         </Link>
                         <Link href={route('tasks.index')}>
-                            <Button className="bg-primary hover:bg-primary/90 text-white shadow-lg">
+                            <Button>
                                 <CheckCircle className="h-4 w-4 mr-2" />
                                 View Tasks
                             </Button>

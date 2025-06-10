@@ -192,14 +192,12 @@ export default function TasksIndex({ tasks, lists, filters, flash }: Props) {
                 {/* Header Section */}
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
-                        <p className="text-muted-foreground mt-1">
-                            Manage your tasks and stay organized
-                        </p>
+                        <h1 className="text-2xl font-bold tracking-tight">Tasks</h1>
+                        <p className="text-muted-foreground mt-1">Create and Manage your tasks and stay organized</p>
                     </div>
                     <Dialog open={isOpen} onOpenChange={setIsOpen}>
                         <DialogTrigger>
-                            <Button className="bg-primary hover:bg-primary/90 text-white shadow-lg">
+                            <Button>
                                 <Plus className="h-4 w-4 mr-2" />
                                 New Task
                             </Button>
