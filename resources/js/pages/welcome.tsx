@@ -85,7 +85,7 @@ export default function Welcome() {
                         <div className="relative -mb-px aspect-[335/376] w-full shrink-0 overflow-hidden rounded-t-lg bg-[#fff2f2] lg:mb-0 lg:-ml-px lg:aspect-auto lg:w-[438px] lg:rounded-t-none lg:rounded-r-lg dark:bg-[#1D0002]">
                             {/* Custom Task Manager graphic could go here */}
                             <div className="flex h-full items-center justify-center">
-                                <h1 className="text-3xl font-bold text-[#F53003] dark:text-[#FF4433]">Task Manager</h1>
+                                <h1 className="text-3xl font-bold text-[#F53003] dark:text-[#FF4433]">Quick Notes</h1>
                             </div>
 
                             <div className="absolute inset-0 rounded-t-lg shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] lg:rounded-t-none lg:rounded-r-lg dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d]" />

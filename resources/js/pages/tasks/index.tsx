@@ -1,13 +1,15 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, CheckCircle2, XCircle, Calendar, List, CheckCircle, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Pencil, Trash2, CheckCircle2, XCircle, Calendar, List, CheckCircle, Search, ChevronLeft, ChevronRight, Grid, List as ListIcon, Copy, Image, Bold, Italic, Underline, Strikethrough, List as ListBullet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Toggle } from '@/components/ui/toggle';
+import { ColorPicker } from '@/components/ui/color-picker';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 
@@ -66,6 +68,18 @@ export default function TasksIndex({ tasks, lists, filters, flash }: Props) {
     const [toastType, setToastType] = useState<'success' | 'error'>('success');
     const [searchTerm, setSearchTerm] = useState(filters.search);
     const [completionFilter, setCompletionFilter] = useState<'all' | 'completed' | 'pending'>(filters.filter as 'all' | 'completed' | 'pending');
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [deleteTaskId, setDeleteTaskId] = useState<number | null>(null);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [taskStyle, setTaskStyle] = useState({
+        backgroundColor: '',
+        isBold: false,
+        isItalic: false,
+        isUnderline: false,
+        isStrikethrough: false,
+        hasBullets: false
+    });
 
     // Form handling
     const { data, setData, post, put, processing, reset, delete: destroy } = useForm({
@@ -133,7 +147,41 @@ export default function TasksIndex({ tasks, lists, filters, flash }: Props) {
     };
 
     const handleDelete = (taskId: number) => {
-        destroy(route('tasks.destroy', taskId));
+        setDeleteTaskId(taskId);
+        setShowDeleteConfirm(true);
+    };
+
+    const confirmDelete = () => {
+        if (deleteTaskId) {
+            destroy(route('tasks.destroy', deleteTaskId));
+            setShowDeleteConfirm(false);
+            setDeleteTaskId(null);
+        }
+    };
+
+    const handleCopy = (task: Task) => {
+        const taskText = `${task.title}\n${task.description || ''}\nDue: ${task.due_date || 'No due date'}\nStatus: ${task.is_completed ? 'Completed' : 'Pending'}`;
+        navigator.clipboard.writeText(taskText);
+        // Show a toast notification
+        setToastMessage('Task copied to clipboard');
+        setToastType('success');
+        setShowToast(true);
+    };
+
+    const handleImageUpload = (task: Task, event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            // Handle image upload logic here
+            // You'll need to implement the backend API for this
+            console.log('Image upload for task:', task.id, file);
+        }
+    };
+
+    const toggleTextStyle = (style: 'bold' | 'italic' | 'underline' | 'strikethrough' | 'bullets') => {
+        setTaskStyle(prev => ({
+            ...prev,
+            [`is${style.charAt(0).toUpperCase() + style.slice(1)}`]: !prev[`is${style.charAt(0).toUpperCase() + style.slice(1)}` as keyof typeof prev]
+        }));
     };
 
     const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
@@ -195,87 +243,96 @@ export default function TasksIndex({ tasks, lists, filters, flash }: Props) {
                         <h1 className="text-2xl font-bold tracking-tight">Tasks</h1>
                         <p className="text-muted-foreground mt-1">Create and Manage your tasks and stay organized</p>
                     </div>
-                    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                        <DialogTrigger>
-                            <Button>
-                                <Plus className="h-4 w-4 mr-2" />
-                                New Task
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px]">
-                            <DialogHeader>
-                                <DialogTitle className="text-xl">
-                                    {editingTask ? 'Edit Task' : 'Create New Task'}
-                                </DialogTitle>
-                            </DialogHeader>
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="title">Title</Label>
-                                    <Input
-                                        id="title"
-                                        value={data.title}
-                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setData('title', e.target.value)}
-                                        required
-                                        className="focus:ring-2 focus:ring-primary"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="description">Description</Label>
-                                    <Textarea
-                                        id="description"
-                                        value={data.description}
-                                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setData('description', e.target.value)}
-                                        className="focus:ring-2 focus:ring-primary"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="list_id">List</Label>
-                                    <Select
-                                        value={data.list_id}
-                                        onValueChange={(value) => setData('list_id', value)}
-                                    >
-                                        <SelectTrigger className="focus:ring-2 focus:ring-primary">
-                                            <SelectValue placeholder="Select a list" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {lists.map((list) => (
-                                                <SelectItem key={list.id} value={list.id.toString()}>
-                                                    {list.title}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="due_date">Due Date</Label>
-                                    <Input
-                                        id="due_date"
-                                        type="date"
-                                        value={data.due_date}
-                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setData('due_date', e.target.value)}
-                                        className="focus:ring-2 focus:ring-primary"
-                                    />
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <input
-                                        type="checkbox"
-                                        id="is_completed"
-                                        checked={data.is_completed}
-                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setData('is_completed', e.target.checked)}
-                                        className="h-4 w-4 rounded border-gray-300 focus:ring-2 focus:ring-primary"
-                                    />
-                                    <Label htmlFor="is_completed">Completed</Label>
-                                </div>
-                                <Button
-                                    type="submit"
-                                    disabled={processing}
-                                    className="w-full bg-primary hover:bg-primary/90 text-white shadow-lg"
-                                >
-                                    {editingTask ? 'Update' : 'Create'}
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+                        >
+                            {viewMode === 'grid' ? <ListIcon className="h-4 w-4 mr-2" /> : <Grid className="h-4 w-4 mr-2" />}
+                            {viewMode === 'grid' ? 'List View' : 'Grid View'}
+                        </Button>
+                        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                            <DialogTrigger asChild>
+                                <Button>
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    New Task
                                 </Button>
-                            </form>
-                        </DialogContent>
-                    </Dialog>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                    <DialogTitle className="text-xl">
+                                        {editingTask ? 'Edit Task' : 'Create New Task'}
+                                    </DialogTitle>
+                                </DialogHeader>
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="title">Title</Label>
+                                        <Input
+                                            id="title"
+                                            value={data.title}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setData('title', e.target.value)}
+                                            required
+                                            className="focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="description">Description</Label>
+                                        <Textarea
+                                            id="description"
+                                            value={data.description}
+                                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setData('description', e.target.value)}
+                                            className="focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="list_id">List</Label>
+                                        <Select
+                                            value={data.list_id}
+                                            onValueChange={(value) => setData('list_id', value)}
+                                        >
+                                            <SelectTrigger className="focus:ring-2 focus:ring-primary">
+                                                <SelectValue placeholder="Select a list" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {lists.map((list) => (
+                                                    <SelectItem key={list.id} value={list.id.toString()}>
+                                                        {list.title}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="due_date">Due Date</Label>
+                                        <Input
+                                            id="due_date"
+                                            type="date"
+                                            value={data.due_date}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setData('due_date', e.target.value)}
+                                            className="focus:ring-2 focus:ring-primary"
+                                        />
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <input
+                                            type="checkbox"
+                                            id="is_completed"
+                                            checked={data.is_completed}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setData('is_completed', e.target.checked)}
+                                            className="h-4 w-4 rounded border-gray-300 focus:ring-2 focus:ring-primary"
+                                        />
+                                        <Label htmlFor="is_completed">Completed</Label>
+                                    </div>
+                                    <Button
+                                        type="submit"
+                                        disabled={processing}
+                                        className="w-full bg-primary hover:bg-primary/90 text-white shadow-lg"
+                                    >
+                                        {editingTask ? 'Update' : 'Create'}
+                                    </Button>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
                 </div>
 
                 {/* Search and Filter Section */}
@@ -304,13 +361,17 @@ export default function TasksIndex({ tasks, lists, filters, flash }: Props) {
                     </Select>
                 </div>
 
-                {/* Tasks Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Tasks Grid/List */}
+                <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "flex flex-col gap-4"}>
                     {tasks.data.map((task) => (
-                        <Card key={task.id} className="hover:bg-accent/50 transition-colors">
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-lg font-medium">
-                                    {task.title}
+                        <Card
+                            key={task.id}
+                            className={`hover:bg-accent/50 transition-colors ${viewMode === 'list' ? 'flex-row' : ''}`}
+                            style={{ backgroundColor: taskStyle.backgroundColor }}
+                        >
+                            <CardHeader className={`flex flex-row items-center justify-between space-y-0 pb-2 ${viewMode === 'list' ? 'flex-1' : ''}`}>
+                                <CardTitle className={`text-lg font-medium ${taskStyle.isBold ? 'font-bold' : ''} ${taskStyle.isItalic ? 'italic' : ''} ${taskStyle.isUnderline ? 'underline' : ''} ${taskStyle.isStrikethrough ? 'line-through' : ''}`}>
+                                    {taskStyle.hasBullets ? '• ' : ''}{task.title}
                                 </CardTitle>
                                 <div className="flex gap-2">
                                     <Button
@@ -323,6 +384,20 @@ export default function TasksIndex({ tasks, lists, filters, flash }: Props) {
                                     <Button
                                         variant="ghost"
                                         size="icon"
+                                        onClick={() => handleCopy(task)}
+                                    >
+                                        <Copy className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => setSelectedTask(task)}
+                                    >
+                                        <Image className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
                                         onClick={() => handleDelete(task.id)}
                                         className="text-destructive hover:text-destructive/90"
                                     >
@@ -330,8 +405,8 @@ export default function TasksIndex({ tasks, lists, filters, flash }: Props) {
                                     </Button>
                                 </div>
                             </CardHeader>
-                            <CardContent>
-                                <p className="text-sm text-muted-foreground">
+                            <CardContent className={viewMode === 'list' ? 'flex-1' : ''}>
+                                <p className={`text-sm text-muted-foreground ${taskStyle.isBold ? 'font-bold' : ''} ${taskStyle.isItalic ? 'italic' : ''} ${taskStyle.isUnderline ? 'underline' : ''} ${taskStyle.isStrikethrough ? 'line-through' : ''}`}>
                                     {task.description || 'No description'}
                                 </p>
                                 <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
@@ -357,6 +432,63 @@ export default function TasksIndex({ tasks, lists, filters, flash }: Props) {
                             </CardContent>
                         </Card>
                     ))}
+                </div>
+
+                {/* Delete Confirmation Dialog */}
+                <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Confirm Delete</DialogTitle>
+                        </DialogHeader>
+                        <p>Are you sure you want to delete this task? This action cannot be undone.</p>
+                        <DialogFooter>
+                            <DialogClose asChild>
+                                <Button variant="outline">Cancel</Button>
+                            </DialogClose>
+                            <Button variant="destructive" onClick={confirmDelete}>
+                                Delete
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Image Upload Dialog */}
+                <Dialog open={!!selectedTask} onOpenChange={() => setSelectedTask(null)}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Upload Image</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => selectedTask && handleImageUpload(selectedTask, e)}
+                            />
+                        </div>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Text Formatting Toolbar */}
+                <div className="fixed bottom-4 right-4 flex gap-2 bg-background p-2 rounded-lg shadow-lg">
+                    <Toggle pressed={taskStyle.isBold} onPressedChange={() => toggleTextStyle('bold')}>
+                        <Bold className="h-4 w-4" />
+                    </Toggle>
+                    <Toggle pressed={taskStyle.isItalic} onPressedChange={() => toggleTextStyle('italic')}>
+                        <Italic className="h-4 w-4" />
+                    </Toggle>
+                    <Toggle pressed={taskStyle.isUnderline} onPressedChange={() => toggleTextStyle('underline')}>
+                        <Underline className="h-4 w-4" />
+                    </Toggle>
+                    <Toggle pressed={taskStyle.isStrikethrough} onPressedChange={() => toggleTextStyle('strikethrough')}>
+                        <Strikethrough className="h-4 w-4" />
+                    </Toggle>
+                    <Toggle pressed={taskStyle.hasBullets} onPressedChange={() => toggleTextStyle('bullets')}>
+                        <ListBullet className="h-4 w-4" />
+                    </Toggle>
+                    <ColorPicker
+                        value={taskStyle.backgroundColor}
+                        onChange={(color) => setTaskStyle(prev => ({ ...prev, backgroundColor: color }))}
+                    />
                 </div>
 
                 {/* Pagination */}

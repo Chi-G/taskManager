@@ -5,6 +5,7 @@ import { Head, Link } from '@inertiajs/react';
 import { List, CheckCircle, Clock, AlertCircle, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { GoogleDriveSync } from '@/components/google-drive-sync';
 
 interface Props {
     stats?: {
@@ -41,6 +42,7 @@ export default function Dashboard({
                         <p className="text-muted-foreground mt-1">Welcome back! Here's your overview</p>
                     </div>
                     <div className="flex gap-2">
+                        <GoogleDriveSync />
                         <Link href={route('lists.index')}>
                             <Button>
                                 <List className="h-4 w-4 mr-2" />
