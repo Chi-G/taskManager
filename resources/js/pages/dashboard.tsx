@@ -73,15 +73,15 @@ export default function Dashboard({
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-gradient-to-br from-green-500/10 to-green-600/10 border-green-500/20">
+                    <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border-purple-500/20">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-green-500">
+                            <CardTitle className="text-sm font-medium text-purple-500">
                                 Total Tasks
                             </CardTitle>
-                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <CheckCircle className="h-4 w-4 text-purple-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-green-500">{stats.totalTasks}</div>
+                            <div className="text-2xl font-bold text-purple-500">{stats.totalTasks}</div>
                             <p className="text-xs text-muted-foreground">
                                 All your tasks
                             </p>
@@ -103,15 +103,15 @@ export default function Dashboard({
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 border-purple-500/20">
+                    <Card className="bg-gradient-to-br from-green-500/10 to-green-600/10 border-green-500/20">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-purple-500">
+                            <CardTitle className="text-sm font-medium text-green-500">
                                 Completed Tasks
                             </CardTitle>
-                            <AlertCircle className="h-4 w-4 text-purple-500" />
+                            <AlertCircle className="h-4 w-4 text-green-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-purple-500">{stats.completedTasks}</div>
+                            <div className="text-2xl font-bold text-green-500">{stats.completedTasks}</div>
                             <p className="text-xs text-muted-foreground">
                                 Completed tasks
                             </p>
